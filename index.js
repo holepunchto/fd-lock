@@ -18,7 +18,7 @@ module.exports = class FDLock extends ReadyResource {
 
   async _open() {
     try {
-      await this.resume()
+      await this._resume()
     } catch (err) {
       onexit.remove(this)
       await close(this)
@@ -40,12 +40,22 @@ module.exports = class FDLock extends ReadyResource {
   }
 
   async suspend() {
+    if (!this.opened) await this.ready()
+    return this._suspend()
+  }
+
+  async _suspend() {
     if (this._fd === -1 || this._locked === false) return
     fsx.unlock(this._fd)
     this._locked = false
   }
 
   async resume() {
+    if (!this.opened) await this.ready()
+    return this._resume()
+  }
+
+  async _resume() {
     if (this._fd === -1 || this._locked === true) return
     if (this._wait) await fsx.waitForLock(this._fd)
     else if (!fsx.tryLock(this._fd)) {

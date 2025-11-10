@@ -3,7 +3,7 @@ const fs = require('fs')
 const FDLock = require('.')
 
 test('basic', async (t) => {
-  const fd = await open('package.json')
+  const fd = await open('test/fixtures/lock', 'w+')
 
   const lock = new FDLock(fd)
 
@@ -11,8 +11,8 @@ test('basic', async (t) => {
   await t.execution(lock.close())
 })
 
-function open(path) {
+function open(path, mode) {
   return new Promise((resolve, reject) =>
-    fs.open(path, (err, fd) => (err ? reject(err) : resolve(fd)))
+    fs.open(path, mode, (err, fd) => (err ? reject(err) : resolve(fd)))
   )
 }

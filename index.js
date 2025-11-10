@@ -11,16 +11,14 @@ module.exports = class FDLock extends ReadyResource {
 
     this._fd = fd
     this._wait = wait
+    this._locked = false
 
     onexit.add(this, closeSync)
   }
 
   async _open() {
     try {
-      if (this._wait) await fsx.waitForLock(this._fd)
-      else if (!fsx.tryLock(this._fd)) {
-        throw new Error('File descriptor could not be locked')
-      }
+      await this.resume()
     } catch (err) {
       onexit.remove(this)
       await close(this)
@@ -39,6 +37,21 @@ module.exports = class FDLock extends ReadyResource {
     this._fd = -1
     onexit.remove(this)
     return fd
+  }
+
+  async suspend() {
+    if (this._fd === -1 || this._locked === false) return
+    fsx.unlock(this._fd)
+    this._locked = false
+  }
+
+  async resume() {
+    if (this._fd === -1 || this._locked === true) return
+    if (this._wait) await fsx.waitForLock(this._fd)
+    else if (!fsx.tryLock(this._fd)) {
+      throw new Error('File descriptor could not be locked')
+    }
+    this._locked = true
   }
 }
 

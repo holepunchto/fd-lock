@@ -1,6 +1,6 @@
 {
   "name": "fd-lock",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Stateful file descriptor locks for JavaScript",
   "exports": {
     "./package": "./package.json",

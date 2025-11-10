@@ -29,6 +29,7 @@ module.exports = class FDLock extends ReadyResource {
   }
 
   async _close() {
+    onexit.remove(this)
     await close(this)
   }
 

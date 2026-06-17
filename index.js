@@ -16,6 +16,10 @@ module.exports = class FDLock extends ReadyResource {
     onexit.add(this, closeSync)
   }
 
+  get locked() {
+    return this._locked
+  }
+
   async _open() {
     try {
       await this._resume()
@@ -29,6 +33,7 @@ module.exports = class FDLock extends ReadyResource {
   async _close() {
     onexit.remove(this)
     await close(this)
+    this._locked = false
   }
 
   transfer() {
@@ -76,6 +81,7 @@ function closeSync(lock) {
   const fd = lock._fd
   if (fd === -1) return
   lock._fd = -1
+  lock._locked = false
   try {
     fs.closeSync(fd)
   } catch {}
